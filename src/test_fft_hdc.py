@@ -76,8 +76,31 @@ for c in range(NUM_CLASSES):
     print(f"Class {c}: {class_hv[c].mean():.4f}")
 print("====================================\n")
 
+# ---------------- v3: LOAD PRUNING DIMS (OPTIONAL) ----------------
+use_pruning = False
+keep_dims = None
+class_hv_pruned = None
+
+try:
+    keep_dims = np.load("data/keep_dims_v3a.npy")
+    if keep_dims.ndim != 1:
+        raise ValueError("keep_dims_v3.npy must be a 1D array of indices.")
+    if keep_dims.size == 0:
+        raise ValueError("keep_dims is empty.")
+    if keep_dims.max() >= class_hv.shape[1]:
+        raise ValueError("keep_dims contains indices out of range for DIM.")
+
+    class_hv_pruned = class_hv[:, keep_dims]
+    use_pruning = True
+
+    print(f"[v3] Loaded keep_dims_v3.npy: kept {len(keep_dims)}/{class_hv.shape[1]} "
+          f"({len(keep_dims)/class_hv.shape[1]:.3f}) dims")
+except Exception as e:
+    print(f"[v3] Pruning disabled (could not load keep_dims_v3.npy): {e}")
+
 # ---------------- TEST LOOP ----------------
-correct = 0
+correct_full = 0
+correct_pruned = 0
 total = 0
 examples = []
 
@@ -104,10 +127,23 @@ for idx, (img, label) in enumerate(test_loader):
     thr = float(sample_hv_float.mean())
     sample_hv = (sample_hv_float >= thr).astype(np.uint8)
 
-    sims = [similarity(sample_hv, class_hv[c]) for c in range(NUM_CLASSES)]
-    pred = int(np.argmax(sims))
+    # ---- v2 baseline (full dims) ----
+    sims_full = [similarity(sample_hv, class_hv[c]) for c in range(NUM_CLASSES)]
+    pred_full = int(np.argmax(sims_full))
+    correct_full += (pred_full == int(label.item()))
 
-    correct += (pred == int(label.item()))
+    # ---- v3 pruned (kept dims only) ----
+    if use_pruning:
+        sample_hv_pruned = sample_hv[keep_dims]
+        sims_pruned = [similarity(sample_hv_pruned, class_hv_pruned[c]) for c in range(NUM_CLASSES)]
+        pred_pruned = int(np.argmax(sims_pruned))
+        correct_pruned += (pred_pruned == int(label.item()))
+    else:
+        # if pruning disabled, mirror baseline so printing stays consistent
+        sims_pruned = sims_full
+        pred_pruned = pred_full
+        correct_pruned += (pred_pruned == int(label.item()))
+
     total += 1
 
     if len(examples) < 5:
@@ -121,10 +157,22 @@ for idx, (img, label) in enumerate(test_loader):
         if img_np.max() > 1.5:
             img_np = img_np / 255.0
 
-        examples.append((img_np, int(label.item()), pred, amp_bin.copy(), phase_bin.copy(), np.array(sims)))
+        # for visualization, show pruned similarity if available, else full
+        examples.append(
+            (img_np, int(label.item()), pred_full, pred_pruned,
+             amp_bin.copy(), phase_bin.copy(),
+             np.array(sims_full), np.array(sims_pruned))
+        )
 
-accuracy = correct / total
-print(f"🔥 Unified FFT-HDC Test Accuracy: {accuracy:.4f}")
+acc_full = correct_full / total
+acc_pruned = correct_pruned / total
+
+print(f"🔥 v2 baseline accuracy (full dims): {acc_full:.4f}")
+if use_pruning:
+    print(f"🔥 v3 pruned accuracy (kept dims):   {acc_pruned:.4f}")
+    print(f"⚙️  dims kept: {len(keep_dims)}/{DIM} ({len(keep_dims)/DIM:.3f})")
+else:
+    print(f"🔥 v3 pruned accuracy (kept dims):   {acc_pruned:.4f}  (pruning disabled)")
 
 # ---------------- VISUALIZATION ----------------
 print("\nShowing 5 samples with amplitude / phase / similarity...\n")
@@ -132,9 +180,12 @@ print("\nShowing 5 samples with amplitude / phase / similarity...\n")
 fig, axes = plt.subplots(5, 4, figsize=(12, 14))
 axes = axes.reshape(5, 4)
 
-for i, (img_np, true_label, pred_label, amp_bin, phase_bin, sims) in enumerate(examples):
+for i, (img_np, true_label, pred_full, pred_pruned, amp_bin, phase_bin, sims_full, sims_pruned) in enumerate(examples):
     axes[i, 0].imshow(img_np, cmap="gray")
-    axes[i, 0].set_title(f"Image\nT:{true_label} P:{pred_label}")
+    if use_pruning:
+        axes[i, 0].set_title(f"Image\nT:{true_label} F:{pred_full} P:{pred_pruned}")
+    else:
+        axes[i, 0].set_title(f"Image\nT:{true_label} P:{pred_full}")
     axes[i, 0].axis("off")
 
     axes[i, 1].imshow(amp_bin, cmap="inferno")
@@ -145,8 +196,10 @@ for i, (img_np, true_label, pred_label, amp_bin, phase_bin, sims) in enumerate(e
     axes[i, 2].set_title(f"FFT Phase bins (0..{PHASE_LEVELS-1})")
     axes[i, 2].axis("off")
 
-    axes[i, 3].bar(range(NUM_CLASSES), sims)
-    axes[i, 3].set_title("Hamming Similarity")
+    # plot pruned similarity if available, else full
+    sims_to_plot = sims_pruned if use_pruning else sims_full
+    axes[i, 3].bar(range(NUM_CLASSES), sims_to_plot)
+    axes[i, 3].set_title("Hamming Similarity (pruned)" if use_pruning else "Hamming Similarity")
     axes[i, 3].set_xticks(range(NUM_CLASSES))
 
 plt.tight_layout()

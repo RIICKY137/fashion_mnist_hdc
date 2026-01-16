@@ -1,5 +1,6 @@
 import numpy as np
 from load_fashion import get_fashion_mnist
+from prune import compute_keep_dims
 from hdc import generate_random_hypervector, bind  # bind is XOR for 0/1 vectors
 
 # ---------------- CONFIG ----------------
@@ -148,5 +149,23 @@ np.savez(
     ALPHA_AMP=ALPHA_AMP,
     BETA_PHASE=BETA_PHASE
 )
+# ---------------- PRUNING (v3) ----------------
+keep_dims, prune_info = compute_keep_dims(
+    class_hv,
+    remove_constant=True,
+    dedup_signatures=False
+)
+
+# safety checks
+assert keep_dims.ndim == 1 and keep_dims.size > 0
+assert int(keep_dims.min()) >= 0 and int(keep_dims.max()) < DIM
+
+np.save("data/keep_dims_v3a.npy", keep_dims)
+
+print("\n=== v3 pruning stats (Constant only) ===")
+for k, v in prune_info.items():
+    print(f"{k}: {v}")
+print("========================\n")
+
 
 print("✅ Training complete! Saved unified FFT-HDC hypervectors.")
