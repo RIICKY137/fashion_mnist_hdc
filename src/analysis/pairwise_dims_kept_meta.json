@@ -1,0 +1,73 @@
+{
+  "config": {
+    "DIM_full": 16384,
+    "D_eff": 8181,
+    "CROP": 12,
+    "AMP_LEVELS": 32,
+    "PHASE_LEVELS": 16,
+    "ALPHA_AMP": 1.0,
+    "BETA_PHASE": 0.7,
+    "use_keep_dims": true,
+    "keep_dims_file": "data/keep_dims_v3a.npy"
+  },
+  "pairs": [
+    {
+      "pair": [
+        2,
+        4
+      ],
+      "key": "pair_2_4",
+      "k": 256,
+      "mean_abs_diff_topk": 3.8798093795776367,
+      "mean_score_topk": 0.13991743326187134,
+      "max_score": 0.22618882358074188
+    },
+    {
+      "pair": [
+        4,
+        6
+      ],
+      "key": "pair_4_6",
+      "k": 256,
+      "mean_abs_diff_topk": 2.9622554779052734,
+      "mean_score_topk": 0.10761302709579468,
+      "max_score": 0.16279780864715576
+    },
+    {
+      "pair": [
+        0,
+        6
+      ],
+      "key": "pair_0_6",
+      "k": 256,
+      "mean_abs_diff_topk": 4.311356544494629,
+      "mean_score_topk": 0.15473222732543945,
+      "max_score": 0.2829194664955139
+    },
+    {
+      "pair": [
+        7,
+        9
+      ],
+      "key": "pair_7_9",
+      "k": 256,
+      "mean_abs_diff_topk": 6.135541915893555,
+      "mean_score_topk": 0.22366635501384735,
+      "max_score": 0.42429402470588684
+    },
+    {
+      "pair": [
+        5,
+        7
+      ],
+      "key": "pair_5_7",
+      "k": 256,
+      "mean_abs_diff_topk": 5.563700199127197,
+      "mean_score_topk": 0.2002113163471222,
+      "max_score": 0.3425176739692688
+    }
+  ],
+  "n_per_class": 1500,
+  "k_dims": 256,
+  "seed": 0
+}

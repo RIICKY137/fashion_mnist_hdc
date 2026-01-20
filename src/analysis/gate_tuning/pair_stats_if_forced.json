@@ -1,0 +1,23 @@
+{
+  "2_4": {
+    "cand": 694,
+    "base_ok": 440,
+    "base_bad": 254,
+    "winner_ok_if_forced": 427,
+    "winner_bad_if_forced": 267
+  },
+  "4_6": {
+    "cand": 922,
+    "base_ok": 558,
+    "base_bad": 364,
+    "winner_ok_if_forced": 527,
+    "winner_bad_if_forced": 395
+  },
+  "0_6": {
+    "cand": 451,
+    "base_ok": 292,
+    "base_bad": 159,
+    "winner_ok_if_forced": 286,
+    "winner_bad_if_forced": 165
+  }
+}

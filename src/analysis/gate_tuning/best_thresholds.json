@@ -1,0 +1,35 @@
+{
+  "baseline_acc": 0.7018,
+  "N_total": 10000,
+  "N_candidates": 2067,
+  "m_start": 0.0003667033370002848,
+  "c_start": 0.017578125,
+  "m_max": 0.01796846351301795,
+  "c_max": 0.05859375,
+  "M_STEPS": 25,
+  "C_STEPS": 15,
+  "best": {
+    "m_thr": 0.001100110011001021,
+    "c_thr": 0.0205078125,
+    "acc": 0.7024,
+    "flips": 18,
+    "delta_correct": 6
+  },
+  "pairs": [
+    [
+      0,
+      6
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      4,
+      6
+    ]
+  ],
+  "PAIR_KNIFE_K": 512,
+  "use_pruning": true,
+  "D_eff": 8181
+}
