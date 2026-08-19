@@ -1,188 +1,228 @@
-This repository contains an end-to-end implementation of a Hyperdimensional Computing (HDC) model applied to the Fashion-MNIST dataset. The goal of this project is to build an interpretable, lightweight, and efficient HDC pipeline using only NumPy, without relying on deep learning frameworks.
+# Hyperdimensional Computing for Fashion-MNIST
 
-The project walks through:
+This repository provides an end-to-end implementation of a Hyperdimensional Computing (HDC) model for classifying the Fashion-MNIST dataset. The pipeline is implemented primarily with NumPy and does not rely on deep learning frameworks for model construction or training.
 
-Building a binary HDC library from scratch
+The project is intended to provide:
 
-Encoding Fashion-MNIST images using position + intensity hypervectors
+- A lightweight and interpretable HDC image-classification pipeline
+- A from-scratch implementation of binary HDC operations
+- A reproducible baseline for Fashion-MNIST experiments
+- A foundation for evaluating more advanced HDC encoding and learning methods
 
-Training class prototypes with majority voting
+## Project Overview
 
-Performing inference with Hamming similarity
+The implementation covers the complete classification workflow:
 
-Visualizing learned class hypervectors
+1. Construction of a binary HDC library
+2. Encoding of Fashion-MNIST images using position and intensity hypervectors
+3. Training of class prototypes through majority-vote bundling
+4. Classification using Hamming similarity
+5. Visualization of learned class hypervectors
+6. Evaluation of preprocessing and encoding improvements
 
-Experimenting with improvements (denoising, normalization, etc.)
+This repository also serves as a foundation for future experiments aimed at improving classification accuracy while preserving the computational efficiency and interpretability of HDC models.
 
-This implementation also serves as a foundation for future experiments targeting >90% accuracy, and as a clean research example of applying Hyperdimensional Computing to visual classification tasks.
+## Repository Structure
 
-🚀 Project Structure
+```text
 fashion_mnist_hdc/
 │
 ├── src/
-│   ├── hdc.py                # core HDC operations (bind, bundle, similarity)
-│   ├── load_fashion.py       # dataset loader (torchvision)
-│   ├── encode_fashion.py     # training script → generates class hypervectors
-│   ├── test_fashion.py       # inference script → evaluates test accuracy
-│   ├── visualize.py          # visualizes class hypervectors as images
-│   └── v1.py                 # optional archived version
+│   ├── hdc.py                # Core HDC operations
+│   ├── load_fashion.py       # Fashion-MNIST dataset loader
+│   ├── encode_fashion.py     # Training and prototype generation
+│   ├── test_fashion.py       # Model evaluation
+│   ├── visualize.py          # Class hypervector visualization
+│   └── v1.py                 # Archived implementation
 │
-├── data/                     # generated HDC vectors (not included in repo)
+├── data/                     # Generated hypervectors (not included)
 │   ├── pixel_hvs.npy
 │   ├── value_hvs.npy
 │   └── class_hv.npy
 │
-├── hdc_env/                  # local virtual environment (ignored)
-│
+├── hdc_env/                  # Local virtual environment (ignored)
 ├── requirements.txt
 └── README.md
+```
 
-🧠 Hyperdimensional Computing Overview
+## Hyperdimensional Computing
 
-Hyperdimensional Computing (HDC) represents information using extremely high-dimensional binary vectors (usually 5,000–20,000 dimensions).
-Key operations include:
+Hyperdimensional Computing represents information using high-dimensional vectors, typically containing between 5,000 and 20,000 dimensions.
 
-Binding — combines two hypervectors (XOR for binary HDC)
+This project uses binary hypervectors and three primary operations:
 
-Bundling — majority vote aggregation across vectors
+- **Binding:** Combines two hypervectors using bitwise XOR
+- **Bundling:** Aggregates multiple hypervectors using majority voting
+- **Similarity:** Compares hypervectors using Hamming similarity
 
-Similarity — Hamming similarity for classification
+The classification pipeline operates as follows:
 
-For classification tasks, the process is:
+1. Encode each image as a single hypervector.
+2. Bundle the training hypervectors belonging to each class.
+3. Use the resulting bundled vectors as class prototypes.
+4. Encode each test image using the same procedure.
+5. Compare the test hypervector with every class prototype.
+6. Predict the class with the highest similarity score.
 
-Encode each image into a single hypervector
+HDC models are often studied for their computational simplicity, robustness to noise, interpretability, and suitability for resource-constrained hardware.
 
-Bundle all hypervectors of the same class to form one prototype
+## Requirements
 
-Compute similarity between test image hypervectors and class prototypes
+The project requires Python 3 and the packages listed in `requirements.txt`.
 
-Predict the class with the highest similarity score
+Although the HDC model itself is implemented with NumPy, `torchvision` is currently used to download and load the Fashion-MNIST dataset.
 
-The HDC paradigm is:
+## Installation
 
-Lightweight
+### 1. Clone the Repository
 
-Energy-efficient
-
-Interpretable
-
-Highly noise tolerant
-
-Suitable for edge/embedded devices
-
-📦 Installation
-1. Clone the repository
+```bash
 git clone https://github.com/RIICKY137/fashion_mnist_hdc.git
 cd fashion_mnist_hdc
+```
 
-2. Create & activate a virtual environment (optional)
+### 2. Create a Virtual Environment
 
-Windows:
+Creating a virtual environment is recommended but not required.
 
+On Windows:
+
+```bash
 python -m venv hdc_env
 hdc_env\Scripts\activate
+```
 
-3. Install dependencies
+On macOS or Linux:
+
+```bash
+python3 -m venv hdc_env
+source hdc_env/bin/activate
+```
+
+### 3. Install the Dependencies
+
+```bash
 pip install -r requirements.txt
+```
 
-🏋️ Training the HDC Model
+## Training
 
-Training generates three essential hypervector sets:
+Run the following command from the repository root:
 
-pixel_hvs.npy — hypervectors for each pixel position
-
-value_hvs.npy — hypervectors for pixel intensity values (0–255)
-
-class_hv.npy — learned class prototype vectors
-
-Run:
-
+```bash
 python src/encode_fashion.py
+```
 
+The training process generates three sets of hypervectors:
 
-The model uses:
+- `pixel_hvs.npy`: Hypervectors representing pixel positions
+- `value_hvs.npy`: Hypervectors representing pixel intensity values
+- `class_hv.npy`: Learned prototype hypervectors for the ten Fashion-MNIST classes
 
-DIM = 10,000
+The current implementation uses:
 
-Per-pixel encoding (position ⊕ value)
+- 10,000-dimensional binary hypervectors
+- Per-pixel position-intensity binding
+- Image denoising and normalization
+- Majority-vote bundling for class-prototype construction
 
-Image denoising and normalization
+The generated files are stored in the `data/` directory.
 
-Majority-vote class bundling
+## Evaluation
 
-🧪 Testing & Accuracy
+After training, run:
 
-Run:
-
+```bash
 python src/test_fashion.py
+```
 
+The evaluation script reports:
 
-This script outputs:
+- The total number of evaluated test samples
+- Example predictions and corresponding ground-truth labels
+- Overall classification accuracy
 
-Total test samples
+The current implementation achieves approximately 60% test accuracy. This result should be treated as an experimental baseline rather than a definitive performance limit for HDC on Fashion-MNIST.
 
-Prediction vs. ground truth for sample images
+Performance depends on factors including preprocessing, hypervector dimensionality, intensity representation, encoding strategy, and prototype-update rules.
 
-Overall model accuracy
+## Visualization
 
-Current accuracy: ~0.60
-This matches expected performance for an HDC model with early-stage improvements.
+To visualize the learned class hypervectors, run:
 
-Typical HDC ranges:
-
-40–50% baseline (no preprocessing)
-
-60–70% with denoising/normalization
-
-85–93% with advanced encoding techniques
-
-🎨 Visualizing Class Hypervectors
-
-Use:
-
+```bash
 python src/visualize.py
+```
 
+The script reshapes the 10,000-dimensional binary class prototypes into two-dimensional bitmap representations. These visualizations provide a qualitative view of the structures encoded within each class hypervector.
 
-This converts the 10,000-dimensional class hypervectors into 2D binary bitmap images so you can visually inspect what patterns each class prototype has learned.
+The displayed bitmaps are projections of the learned hypervectors and should not be interpreted as direct reconstructions of the original Fashion-MNIST images.
 
-📈 Current Results
-Model Version	Notes	Accuracy
-v1	raw per-pixel sum	~0.10
-v2	corrected binarization	~0.25
-v3	normalization + denoising	~0.60
-🔭 Future Improvements
+## Experimental Results
 
-Potential upgrades targeting 85–90% accuracy:
+| Version | Description | Approximate Accuracy |
+|---------|-------------|---------------------:|
+| v1 | Raw per-pixel aggregation | 10% |
+| v2 | Corrected binary conversion | 25% |
+| v3 | Normalization and denoising | 60% |
 
-Bipolar hypervectors (−1/+1 representation)
+These results reflect different stages of implementation and are not necessarily controlled comparisons.
 
-Multi-level pixel intensity encoding
+For rigorous evaluation, future experiments should record:
 
-Edge-based or feature-extracted embeddings
+- Random seeds
+- Preprocessing parameters
+- Hypervector dimensions
+- Dataset splits
+- Software dependencies
+- Runtime conditions
 
-MAP (multiply-add-permute) encoding
+## Planned Improvements
 
-Pixel-group binding strategies
+Future work may investigate:
 
-Random-index sparse encoding
+- Bipolar hypervectors using `-1` and `+1`
+- Multi-level or continuous intensity encoding
+- Edge-based and local-feature representations
+- Multiply-add-permute encoding
+- Region-based and pixel-group binding
+- Sparse random indexing
+- Iterative class-prototype updates
+- Quantized and bit-packed implementations
+- Runtime and memory benchmarking
+- Ablation studies for individual preprocessing steps
 
-Continuous-class prototype updates
+Future experimental implementations may be organized under an `experiments/` directory.
 
-Future experiments will be added under an experiments/ folder.
+## Reproducibility
 
-🤝 Contributing
+For reproducible experiments, subsequent versions should document:
 
-Contributions and discussions are welcome.
-Interesting directions include:
+- Random seeds
+- Dataset and library versions
+- Training and test sample counts
+- Hypervector dimensionality
+- Preprocessing parameters
+- Encoding configuration
+- Hardware and runtime measurements
 
-Alternative binding/bundling operators
+Generated hypervectors are not included in the repository and must be recreated by running the training script.
 
-Optimized binary implementations
+## Contributing
 
-Applications to other computer vision tasks
+Contributions, issue reports, and technical discussions are welcome.
 
-Hybrid HDC + neural network models
+Relevant research directions include:
 
-📜 License
+- Alternative binding and bundling operators
+- Improved image-encoding strategies
+- Efficient binary implementations
+- Prototype-learning algorithms
+- Applications to additional computer-vision datasets
+- Hybrid neural-network and HDC architectures
 
-This project is open-source under the MIT License.
+Contributions should include a clear description of the proposed change and, where applicable, reproducible evaluation results.
+
+## License
+
+This project is released under the MIT License. See the `LICENSE` file for details.
